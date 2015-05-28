@@ -6,6 +6,41 @@
 using namespace cv;
 using namespace std;
 
+const int SCALING_FACTOR = pow(2, 16);
+
+uint mul(uint a, uint b)
+{
+    uint ah = a >> 16;
+    uint bh = b >> 16;
+
+    uint al = a & 0xFFFF;
+    uint bl = b & 0xFFFF;
+
+    int h = (ah*bh);
+    int l = (al*bl) >> 16;
+
+    uint res = (h & 0xFFFF0000)  + l;
+
+    return res;
+}
+
+uint to_fixed(float f)
+{
+    uint h = floor(f)*SCALING_FACTOR;
+    uint l = (uint)((f-h)*SCALING_FACTOR);
+
+    return h + l;
+}
+
+float to_float(uint f)
+{
+    float res;
+    float rh = f /SCALING_FACTOR;
+    float rl = (float)(f & 0xFFFF)/SCALING_FACTOR;
+    res = rh + rl;
+    return res;
+}
+
 Mat horizontal(Mat &src, int dRows, int dCols, float fx)
 {
     Mat dst = Mat::zeros(dRows, dCols, CV_8UC1);
@@ -51,12 +86,25 @@ int main(int argc, char** argv )
     int dRows = image.rows;
     int dCols = 800;
 
+    uint f;
+
     float fx = (float)image.cols/dCols;
-    dst = horizontal(image, dRows, dCols, fx);
-    imshow("cv image", dst);
 
+    f = floor(fx)*SCALING_FACTOR;
+    f = (fx - f)*SCALING_FACTOR;
 
-    while(waitKey(0) != 27);
+    float a = 0.5;
+    float b = 0.5;
+
+    uint fa = to_fixed(a);
+    uint fb = to_fixed(b);
+
+    uint r  = mul(fa, fb);
+
+    // dst = horizontal(image, dRows, dCols, fx);
+    // imshow("cv image", dst);
+    //
+    // while(waitKey(0) != 27);
 
     return 0;
 }
