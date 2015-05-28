@@ -66,12 +66,12 @@ Mat horizontal(Mat &src, uint dRows, uint dCols, uint fx)
             target = mul(to_fixed(col),fx);
             iA = target & 0xFFFF0000;
             iB = iA + one;
-            fact = iA & 0xFFFF;
+            fact = target & 0xFFFF;
 
             if(col > 3 && col < 7 && row == 0)
             {
-                cout << "target: ";  print_fixed(target);
-                cout << target << endl << one << endl;
+                cout << "target: "; print_fixed(target);
+                cout << "fact  : "; print_fixed(fact);
                 cout << "iA: "; print_fixed(iA);
                 cout << "iB: "; print_fixed(iB);
                 cout << endl;
