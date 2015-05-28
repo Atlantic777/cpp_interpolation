@@ -8,11 +8,15 @@ using namespace std;
 
 const int SCALING_FACTOR = pow(2, 16);
 
+#define H_MASK  0xFFFF0000
+#define L_MASK  0xFFFF
+#define HH_MASK 0xFFFFFFFF00000000
+
 float to_float(uint f)
 {
     float res;
-    float rh = (f & 0xFFFF0000) / SCALING_FACTOR;
-    float rl = (float)(f & 0xFFFF)/ SCALING_FACTOR;
+    float rh = (f & H_MASK) / SCALING_FACTOR;
+    float rl = (float)(f & L_MASK)/ SCALING_FACTOR;
     res = rh + rl;
 
     return res;
@@ -26,8 +30,8 @@ void print_fixed(uint a)
 uint mul(uint a, uint b)
 {
     unsigned long m = (unsigned long)a*b;
-    uint mh = (m&0xFFFFFFFF00000000) >> 16;
-    uint ml = (m&0xFFFF0000) >> 16;
+    uint mh = (m& HH_MASK) >> 16;
+    uint ml = (m& H_MASK) >> 16;
     uint res = mh + ml;
 
     // cout << "beg mul" << endl;
@@ -68,14 +72,14 @@ Mat horizontal(Mat &src, uint dRows, uint dCols, uint fy, uint fx)
             tx = mul(to_fixed(col), fx);
             ty = mul(to_fixed(row), fy);
 
-            iX = tx & 0xFFFF0000;
+            iX = tx & H_MASK;
             iXN = iX + one;
 
-            iY = ty & 0xFFFF0000;
+            iY = ty & H_MASK;
             iYN = iY + one;
 
-            fact_x = tx & 0xFFFF;
-            fact_y = ty & 0xFFFF;
+            fact_x = tx & L_MASK;
+            fact_y = ty & L_MASK;
 
             if(iX >= to_fixed(dCols)) {
                 iX = to_fixed(dCols)-one;
@@ -130,7 +134,7 @@ Mat horizontal(Mat &src, uint dRows, uint dCols, uint fy, uint fx)
                 cout << "#####################" << endl;
             }
 
-            dst.at<uchar>(row, col, 0) = (res&0xFFFF0000)>>16;
+            dst.at<uchar>(row, col, 0) = (res & H_MASK)>>16;
         }
     }
 
