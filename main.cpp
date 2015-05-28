@@ -12,6 +12,9 @@ const int SCALING_FACTOR = pow(2, 16);
 #define L_MASK  0xFFFF
 #define HH_MASK 0xFFFFFFFF00000000
 
+#define H_BITS 16
+#define L_BITS 16
+
 float to_float(uint f)
 {
     float res;
@@ -30,9 +33,9 @@ void print_fixed(uint a)
 uint mul(uint a, uint b)
 {
     unsigned long m = (unsigned long)a*b;
-    uint mh = (m& HH_MASK) >> 16;
-    uint ml = (m& H_MASK) >> 16;
-    uint res = mh + ml;
+    uint mh  = (m & HH_MASK) >> H_BITS;
+    uint ml  = (m & H_MASK)  >> L_BITS;
+    uint res =  mh + ml;
 
     // cout << "beg mul" << endl;
     // cout << m << endl;
@@ -153,26 +156,9 @@ int main(int argc, char** argv )
     uint  ufx = to_fixed(fx);
 
     float fy  = (float)image.rows/dRows;
-    cout << fy << endl;
     uint  ufy = to_fixed(fy);
-    print_fixed(ufy);
-    cout << "------------------" << endl;
-
-    uint one = to_fixed(1);
-    print_fixed(one);
-    uint zero = to_fixed(0);
-    print_fixed(zero);
-    print_fixed(one-zero);
-
-
-    // uint a = to_fixed(0.5);
-    // uint b = to_fixed(2.5);
-    // print_fixed(a);
-    // print_fixed(b);
-    // print_fixed(mul(a, b));
 
     dst = horizontal(image, dRows, dCols, ufy, ufx);
-    // horizontal(image, dRows, dCols, f);
     imshow("cv image", dst);
     while(waitKey(0) != 27);
 
