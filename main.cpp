@@ -60,13 +60,17 @@ uint to_fixed(float f)
 Mat horizontal(Mat &src, uint dRows, uint dCols, uint fy, uint fx)
 {
     Mat dst = Mat::zeros(dRows, dCols, CV_8UC1);
+
     uint tx, ty;
     uint fact_x, fact_y;
     uint iX, iXN, iY, iYN;
     uint res, rt, rb;
     uint first, second;
 
-    uint one = to_fixed(1);
+    uint fOne = to_fixed(1);
+
+    uint fsColsLim = to_fixed(src.cols) - fOne;
+    uint fsRowsLim = to_fixed(src.rows) - fOne;
 
     for(uint row = 0; row < dRows; row++)
     {
@@ -75,29 +79,29 @@ Mat horizontal(Mat &src, uint dRows, uint dCols, uint fy, uint fx)
             tx = mul(to_fixed(col), fx);
             ty = mul(to_fixed(row), fy);
 
-            iX = tx & H_MASK;
-            iXN = iX + one;
+            iX  = tx & H_MASK;
+            iXN = iX + fOne;
 
-            iY = ty & H_MASK;
-            iYN = iY + one;
+            iY  = ty & H_MASK;
+            iYN = iY + fOne;
 
             fact_x = tx & L_MASK;
             fact_y = ty & L_MASK;
 
-            if(iX >= to_fixed(dCols)) {
-                iX = to_fixed(dCols)-one;
+            if(iX > fsColsLim) {
+                iX = fsColsLim;
             }
 
-            if(iXN >= to_fixed(dCols)) {
-                iXN = to_fixed(dCols)-one;
+            if(iXN > fsColsLim) {
+                iXN = fsColsLim;
             }
 
-            if(iY >= to_fixed(dRows)) {
-                iY = to_fixed(dRows)-one;
+            if(iY > fsRowsLim) {
+                iY = fsRowsLim;
             }
 
-            if(iY >= to_fixed(dRows)) {
-                iYN = to_fixed(dRows)-one;
+            if(iY > fsRowsLim) {
+                iYN = fsRowsLim;
             }
 
             int a = src.at<uchar>(iY  >>16, iX  >>16, 0);
@@ -105,10 +109,10 @@ Mat horizontal(Mat &src, uint dRows, uint dCols, uint fy, uint fx)
             int c = src.at<uchar>(iYN >>16, iX  >>16, 0);
             int d = src.at<uchar>(iYN >>16, iXN >>16, 0);
 
-            rt = mul((one-fact_x), to_fixed(a))+mul(fact_x,to_fixed(b));
-            rb = mul((one-fact_x), to_fixed(c))+mul(fact_x,to_fixed(d));
+            rt = mul((fOne-fact_x), to_fixed(a))+mul(fact_x,to_fixed(b));
+            rb = mul((fOne-fact_x), to_fixed(c))+mul(fact_x,to_fixed(d));
 
-            first  = mul((one-fact_y), rt);
+            first  = mul((fOne-fact_y), rt);
             second = mul(fact_y, rb);
             res = first + second;
 
